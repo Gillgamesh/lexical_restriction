@@ -8,6 +8,7 @@ import numpy as np
 from pandas.api.types import CategoricalDtype
 from scipy.sparse import csr_matrix, csc_matrix, vstack
 from sqlalchemy import create_engine
+from sqlalchemy.engine.url import URL
 import argparse
 
 GROUP_ID = "group_id"
@@ -257,16 +258,19 @@ parser.add_argument("--debug", action="store_true", help="Enable debug output")
 2022-01-26 - Copied from other files for portability reasons.
 """
 
-USERNAME = os.environ.get("MYSQL_USER")
-PASSWORD = os.environ.get("MYSQL_PASSWORD") or ''
-HOST = os.environ.get("MYSQL_HOST") or '127.0.0.1:3306'
+# USERNAME = os.environ.get("MYSQL_USER")
+# PASSWORD = os.environ.get("MYSQL_PASSWORD") or ''
+HOST = os.environ.get("MYSQL_HOST") or 'localhost'
+MY_CNF = os.environ.get("MYSQL_MY_CNF") or "~/.my.cnf"
 
 
 def get_engine(database):
-    engine_string = "mysql://{}:{}@{}/{}".format(
-        USERNAME, PASSWORD, HOST, database
-    )
-    return create_engine(engine_string)
+    # engine_string = "mysql://{}:{}@{}/{}".format(
+    #     USERNAME, PASSWORD, HOST, database
+    # )
+    db_url = URL(drivername='mysql', host=HOST, database=database,
+    query={'read_default_file': MY_CNF})
+    return create_engine(name_or_url=db_url)
 
 
 def sql_to_dataframe(database, table_name, **kwargs):
